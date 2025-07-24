@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { ObjectId } from "mongodb";
 import { StringValue } from "ms";
 import { TokenType } from "~/constants/enums.js";
 
@@ -23,7 +24,7 @@ export const signToken = ({
   });
 };
 
-export const signAccessToken = (user_id: string) => {
+export const signAccessToken = (user_id: ObjectId) => {
   return signToken({
     payload: {
       user_id,
@@ -35,7 +36,7 @@ export const signAccessToken = (user_id: string) => {
   });
 };
 
-export const signRefreshToken = (user_id: string) => {
+export const signRefreshToken = (user_id: ObjectId) => {
   return signToken({
     payload: {
       user_id,
