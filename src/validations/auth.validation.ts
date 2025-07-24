@@ -30,3 +30,8 @@ export const register = Joi.object({
     "any.required": "Ngày sinh là bắt buộc"
   })
 });
+
+export const login = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).max(36).required()
+});
