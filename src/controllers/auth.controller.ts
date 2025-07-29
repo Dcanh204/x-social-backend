@@ -20,3 +20,11 @@ export const login = catchAsync(async (req: Request, res: Response) => {
     tokens
   });
 });
+
+export const logout = catchAsync(async (req: Request, res: Response) => {
+  const { refresh_token } = req.body;
+  await authService.logout(refresh_token);
+  res.status(StatusCodes.OK).json({
+    message: "Logout sucess"
+  });
+});

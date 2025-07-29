@@ -54,3 +54,11 @@ export const login = async (email: string, password: string) => {
     refresh_token
   };
 };
+
+export const logout = async (refresh_token: string): Promise<void> => {
+  const refreshTokenDoc = await database.refreshTokens.findOne({ token: refresh_token });
+  if (!refreshTokenDoc) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "refresh_token not found!");
+  }
+  await database.refreshTokens.deleteOne({ _id: refreshTokenDoc._id });
+};
