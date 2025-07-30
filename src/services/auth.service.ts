@@ -3,7 +3,7 @@ import User from "~/models/schema/User.schema.js";
 import RefreshToken from "~/models/schema/RefreshToken.schema.js";
 import { RegisterReqBody } from "~/types/auth.type.js";
 import { hashPassword, comparePassword } from "~/utils/hash.js";
-import { signAccessToken, signRefreshToken, signToken } from "~/utils/signToken.js";
+import { signAccessToken, signRefreshToken, signToken, verifyToken } from "~/utils/signToken.js";
 import { StatusCodes } from "http-status-codes";
 import ApiError from "~/utils/ApiError.js";
 
@@ -61,4 +61,19 @@ export const logout = async (refresh_token: string): Promise<void> => {
     throw new ApiError(StatusCodes.NOT_FOUND, "refresh_token not found!");
   }
   await database.refreshTokens.deleteOne({ _id: refreshTokenDoc._id });
+};
+
+export const refreshAccressToken = async (refresh_token: string) => {
+  const decoded_refresh_token = await verifyToken({
+    token: refresh_token,
+    secretOrPublicKey: process.env.JWT_SECRET_REFRESH_TOKEN as string
+  });
+
+  const tokenInDB = await database.refreshTokens.findOne({ token: refresh_token });
+  if (!tokenInDB) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, "Refresh token not found!");
+  }
+
+  const newAccessToken = await signAccessToken(decoded_refresh_token.user_id);
+  return newAccessToken;
 };

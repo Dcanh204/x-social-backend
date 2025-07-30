@@ -28,3 +28,12 @@ export const logout = catchAsync(async (req: Request, res: Response) => {
     message: "Logout sucess"
   });
 });
+
+export const refreshAccessToken = catchAsync(async (req: Request, res: Response) => {
+  const { refresh_token } = req.body;
+  const newAccessToken = await authService.refreshAccressToken(refresh_token);
+  res.status(StatusCodes.OK).json({
+    message: "refresh access token sucess",
+    access_token: newAccessToken
+  });
+});
