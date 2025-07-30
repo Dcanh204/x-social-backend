@@ -16,3 +16,7 @@ export const login = Joi.object({
 export const refresh_token = Joi.object({
   refresh_token: Joi.string().min(20).required()
 });
+
+export const verify_email = Joi.object({
+  email_verify_token: Joi.string().required()
+});
