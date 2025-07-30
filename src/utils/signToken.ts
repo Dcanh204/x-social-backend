@@ -5,13 +5,13 @@ import { TokenType } from "~/constants/enums.js";
 
 export const signToken = ({
   payload,
-  privateKey = process.env.JWT_SECRET_KEY as string,
+  privateKey,
   options = {
     algorithm: "HS256"
   }
 }: {
   payload: string | object;
-  privateKey?: string;
+  privateKey: string;
   options?: jwt.SignOptions;
 }): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -30,6 +30,7 @@ export const signAccessToken = (user_id: ObjectId) => {
       user_id,
       token_type: TokenType.AccessToken
     },
+    privateKey: process.env.JWT_SECRET_ACCESS_TOKEN as string,
     options: {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN as StringValue
     }
@@ -42,19 +43,14 @@ export const signRefreshToken = (user_id: ObjectId) => {
       user_id,
       token_type: TokenType.RefreshToken
     },
+    privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
     options: {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN as StringValue
     }
   });
 };
 
-export const verifyToken = ({
-  token,
-  secretOrPublicKey = process.env.JWT_SECRET_KEY as string
-}: {
-  token: string;
-  secretOrPublicKey?: string;
-}) => {
+export const verifyToken = ({ token, secretOrPublicKey }: { token: string; secretOrPublicKey: string }) => {
   return new Promise<jwt.JwtPayload>((resolve, reject) => {
     jwt.verify(token, secretOrPublicKey, (error, decoded) => {
       if (error) {
