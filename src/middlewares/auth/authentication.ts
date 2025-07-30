@@ -9,10 +9,12 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     if (!token || !token.startsWith("Bearer")) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Authorization token missing");
     }
-
     const access_token = token.split(" ")[1];
 
-    const decoded_access_token = await verifyToken({ token: access_token });
+    const decoded_access_token = await verifyToken({
+      token: access_token,
+      secretOrPublicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
+    });
     req.user = decoded_access_token;
     next();
   } catch (error: any) {
