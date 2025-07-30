@@ -37,3 +37,11 @@ export const refreshAccessToken = catchAsync(async (req: Request, res: Response)
     access_token: newAccessToken
   });
 });
+
+export const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+  const { email_verify_token } = req.body;
+  await authService.verifyEmail(email_verify_token);
+  res.status(StatusCodes.OK).json({
+    message: "email verified successfully"
+  });
+});

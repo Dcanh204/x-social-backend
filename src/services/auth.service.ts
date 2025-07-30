@@ -3,12 +3,16 @@ import User from "~/models/schema/User.schema.js";
 import RefreshToken from "~/models/schema/RefreshToken.schema.js";
 import { RegisterReqBody } from "~/types/auth.type.js";
 import { hashPassword, comparePassword } from "~/utils/hash.js";
-import { signAccessToken, signRefreshToken, signToken, verifyToken } from "~/utils/signToken.js";
+import { signAccessToken, signEmailVerifyToken, signRefreshToken, verifyToken } from "~/utils/signToken.js";
 import { StatusCodes } from "http-status-codes";
 import ApiError from "~/utils/ApiError.js";
+import { ObjectId } from "mongodb";
+import { UserVerifyStatus } from "~/constants/enums.js";
 
 export const register = async (userData: RegisterReqBody) => {
   const { username, email, password } = userData;
+  const user_id = new ObjectId();
+  const email_verify_token = await signEmailVerifyToken(user_id);
   const existingUser = await database.users.findOne({ email: userData.email });
 
   if (existingUser) {
@@ -18,10 +22,12 @@ export const register = async (userData: RegisterReqBody) => {
   const hashedPassword = await hashPassword(password);
   const result = await database.users.insertOne(
     new User({
+      _id: user_id,
       username,
       email,
       password: hashedPassword,
-      date_of_birth: new Date(userData.date_of_birth)
+      date_of_birth: new Date(userData.date_of_birth),
+      email_verify_token
     })
   );
 
@@ -29,7 +35,8 @@ export const register = async (userData: RegisterReqBody) => {
     id: result.insertedId.toString(),
     username,
     email,
-    date_of_birth: new Date(userData.date_of_birth)
+    date_of_birth: new Date(userData.date_of_birth),
+    email_verify_token
   };
 };
 
@@ -76,4 +83,40 @@ export const refreshAccressToken = async (refresh_token: string) => {
 
   const newAccessToken = await signAccessToken(decoded_refresh_token.user_id);
   return newAccessToken;
+};
+
+export const verifyEmail = async (email_token: string) => {
+  const decoded_verify_email = await verifyToken({
+    token: email_token,
+    secretOrPublicKey: process.env.JWT_SECRET_EMAIL_VERIFY_TOKEN as string
+  });
+
+  if (!decoded_verify_email) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid and expired token");
+  }
+
+  const user_id = decoded_verify_email.user_id as string;
+
+  const user = await database.users.findOne({
+    _id: new ObjectId(user_id)
+  });
+
+  if (!user) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  if (user.email_verify_token === "") {
+    throw new ApiError(StatusCodes.CONFLICT, "Email already verified");
+  }
+
+  await database.users.updateOne(
+    { _id: new ObjectId(user_id) },
+    {
+      $set: {
+        email_verify_token: "",
+        user_verify_status: UserVerifyStatus.Verified,
+        updated_at: new Date()
+      }
+    }
+  );
 };
