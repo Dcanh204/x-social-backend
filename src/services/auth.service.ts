@@ -109,14 +109,35 @@ export const verifyEmail = async (email_token: string) => {
     throw new ApiError(StatusCodes.CONFLICT, "Email already verified");
   }
 
-  await database.users.updateOne(
-    { _id: new ObjectId(user_id) },
+  await database.users.updateOne({ _id: new ObjectId(user_id) }, [
     {
       $set: {
         email_verify_token: "",
         user_verify_status: UserVerifyStatus.Verified,
-        updated_at: new Date()
+        updated_at: "$$NOW"
       }
     }
-  );
+  ]);
+};
+
+export const resend_verify_email = async (user_id: string) => {
+  const user = await database.users.findOne({ _id: new ObjectId(user_id) });
+  if (!user) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "User not found!");
+  }
+
+  if (user.user_verify_status === UserVerifyStatus.Verified) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Account already verified");
+  }
+
+  const email_verify_token = await signEmailVerifyToken(user._id);
+
+  await database.users.updateOne({ _id: new ObjectId(user_id) }, [
+    {
+      $set: {
+        email_verify_token,
+        updated_at: "$$NOW"
+      }
+    }
+  ]);
 };

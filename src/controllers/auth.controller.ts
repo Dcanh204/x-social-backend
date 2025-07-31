@@ -3,6 +3,7 @@ import * as authService from "~/services/auth.service.js";
 import { RegisterReqBody } from "~/types/auth.type.js";
 import { catchAsync } from "~/utils/catchAsync.js";
 import { StatusCodes } from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
 
 export const register = catchAsync(async (req: Request<object, any, RegisterReqBody>, res: Response) => {
   const user = await authService.register(req.body);
@@ -43,5 +44,13 @@ export const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   await authService.verifyEmail(email_verify_token);
   res.status(StatusCodes.OK).json({
     message: "email verified successfully"
+  });
+});
+
+export const resend_verify_email = catchAsync(async (req: Request, res: Response) => {
+  const { user_id } = req.user as JwtPayload;
+  await authService.resend_verify_email(user_id);
+  res.status(StatusCodes.OK).json({
+    message: "Resend verify email successfully"
   });
 });
