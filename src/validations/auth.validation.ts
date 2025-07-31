@@ -20,3 +20,7 @@ export const refresh_token = Joi.object({
 export const verify_email = Joi.object({
   email_verify_token: Joi.string().required()
 });
+
+export const forgot_password = Joi.object({
+  email: Joi.string().email().required()
+});
