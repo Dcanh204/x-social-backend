@@ -164,3 +164,33 @@ export const forgotPassword = async (email: string) => {
     }
   ]);
 };
+
+export const resetPassword = async (forgot_password_token: string, new_password: string) => {
+  const user = await database.users.findOne({ forgot_password_token });
+
+  if (!user) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Invalid and expired token");
+  }
+
+  const decoded_token = await verifyToken({
+    token: forgot_password_token,
+    secretOrPublicKey: process.env.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string
+  });
+
+  if (decoded_token.user_id !== user._id.toString()) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid Token ");
+  }
+
+  await database.users.updateOne(
+    { _id: new ObjectId(user._id) },
+    {
+      $set: {
+        password: await hashPassword(new_password),
+        forgot_password_token: ""
+      },
+      $currentDate: {
+        created_at: true
+      }
+    }
+  );
+};

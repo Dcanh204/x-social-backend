@@ -6,7 +6,8 @@ import {
   refreshAccessToken,
   verifyEmail,
   resend_verify_email,
-  forgotPassword
+  forgotPassword,
+  resetPassword
 } from "../controllers/auth.controller.js";
 import { validate } from "../middlewares/validate.js";
 import * as authValidation from "../validations/auth.validation.js";
@@ -20,4 +21,5 @@ authRouter.post("/refresh-token", validate(authValidation.refresh_token), refres
 authRouter.post("/resend-verify-email", authenticate, resend_verify_email);
 authRouter.post("/verify-email", validate(authValidation.verify_email), verifyEmail);
 authRouter.post("/forgot-password", validate(authValidation.forgot_password), forgotPassword);
+authRouter.post("/reset-password", validate(authValidation.reset_password), resetPassword);
 export default authRouter;

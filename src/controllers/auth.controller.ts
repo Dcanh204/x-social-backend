@@ -62,3 +62,11 @@ export const forgotPassword = catchAsync(async (req: Request, res: Response) => 
     message: "Check email to reset password"
   });
 });
+
+export const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  const { forgot_password_token, new_password } = req.body;
+  await authService.resetPassword(forgot_password_token, new_password);
+  res.status(StatusCodes.OK).json({
+    message: "Reset password sucessfully"
+  });
+});
