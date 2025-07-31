@@ -63,6 +63,19 @@ export const signEmailVerifyToken = (user_id: ObjectId) => {
   });
 };
 
+export const signForgotPasswordToken = (user_id: ObjectId) => {
+  return signToken({
+    payload: {
+      user_id,
+      TokenType: TokenType.ForgotPasswordToken
+    },
+    privateKey: process.env.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string,
+    options: {
+      expiresIn: process.env.FORGOT_PASSWORD_TOKEN_EXPIRES_IN as StringValue
+    }
+  });
+};
+
 export const verifyToken = ({ token, secretOrPublicKey }: { token: string; secretOrPublicKey: string }) => {
   return new Promise<jwt.JwtPayload>((resolve, reject) => {
     jwt.verify(token, secretOrPublicKey, (error, decoded) => {
