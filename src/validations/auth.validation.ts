@@ -24,3 +24,9 @@ export const verify_email = Joi.object({
 export const forgot_password = Joi.object({
   email: Joi.string().email().required()
 });
+
+export const reset_password = Joi.object({
+  forgot_password_token: Joi.string().required(),
+  new_password: Joi.string().min(8).max(36).required(),
+  comfirm_new_password: Joi.valid(Joi.ref("new_password")).required()
+});
