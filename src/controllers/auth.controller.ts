@@ -54,3 +54,11 @@ export const resend_verify_email = catchAsync(async (req: Request, res: Response
     message: "Resend verify email successfully"
   });
 });
+
+export const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  await authService.forgotPassword(email);
+  res.status(StatusCodes.OK).json({
+    message: "Check email to reset password"
+  });
+});

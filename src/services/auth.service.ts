@@ -3,7 +3,13 @@ import User from "~/models/schema/User.schema.js";
 import RefreshToken from "~/models/schema/RefreshToken.schema.js";
 import { RegisterReqBody } from "~/types/auth.type.js";
 import { hashPassword, comparePassword } from "~/utils/hash.js";
-import { signAccessToken, signEmailVerifyToken, signRefreshToken, verifyToken } from "~/utils/signToken.js";
+import {
+  signAccessToken,
+  signEmailVerifyToken,
+  signForgotPasswordToken,
+  signRefreshToken,
+  verifyToken
+} from "~/utils/signToken.js";
 import { StatusCodes } from "http-status-codes";
 import ApiError from "~/utils/ApiError.js";
 import { ObjectId } from "mongodb";
@@ -136,6 +142,23 @@ export const resend_verify_email = async (user_id: string) => {
     {
       $set: {
         email_verify_token,
+        updated_at: "$$NOW"
+      }
+    }
+  ]);
+};
+
+export const forgotPassword = async (email: string) => {
+  const user = await database.users.findOne({ email });
+  if (!user) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Email does not exist");
+  }
+  const forgot_password_token = await signForgotPasswordToken(user._id);
+
+  await database.users.updateOne({ _id: new ObjectId(user._id) }, [
+    {
+      $set: {
+        forgot_password_token,
         updated_at: "$$NOW"
       }
     }
