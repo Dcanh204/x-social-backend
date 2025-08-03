@@ -20,6 +20,14 @@ export const getProfile = async (user_id: string) => {
 };
 
 export const updatedProfile = async (user_id: string, userData: UpdateMeReqBody) => {
+  const name_existed = await database.users.findOne({
+    name: userData.name,
+    _id: { $ne: new ObjectId(user_id) }
+  });
+
+  if (name_existed) {
+    throw new ApiError(StatusCodes.CONFLICT, "username already");
+  }
   const userDoc = await database.users.findOneAndUpdate(
     {
       _id: new ObjectId(user_id)
