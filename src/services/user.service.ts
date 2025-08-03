@@ -73,3 +73,16 @@ export const follow = async (follower_id: string, following_id: string) => {
     })
   );
 };
+
+export const unfollow = async (follower_id: string, following_id: string) => {
+  const follow = await database.followers.findOne({
+    follower_id: new ObjectId(follower_id),
+    following_id: new ObjectId(following_id)
+  });
+
+  if (!follow) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "You don't follow this user");
+  }
+
+  await database.followers.deleteOne({ _id: follow._id });
+};

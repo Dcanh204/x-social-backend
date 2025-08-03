@@ -30,3 +30,12 @@ export const follow = catchAsync(async (req: Request, res: Response) => {
     message: "Follow success"
   });
 });
+
+export const unfollow = catchAsync(async (req: Request, res: Response) => {
+  const { user_id } = req.user as JwtPayload;
+  const following_id = req.params.id;
+  await userService.unfollow(user_id, following_id);
+  res.status(StatusCodes.OK).json({
+    message: "Unfollow success"
+  });
+});
