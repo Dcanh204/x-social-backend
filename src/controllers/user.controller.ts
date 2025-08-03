@@ -13,3 +13,12 @@ export const getProfile = catchAsync(async (req: Request, res: Response) => {
     data: user
   });
 });
+
+export const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  const { user_id } = req.user as JwtPayload;
+  const updatedUser = await userService.updatedProfile(user_id, req.body);
+  res.status(StatusCodes.OK).json({
+    message: "Updated profile successfully",
+    data: updatedUser
+  });
+});
