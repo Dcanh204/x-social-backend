@@ -2,6 +2,7 @@ import { Collection, Db, MongoClient } from "mongodb";
 import dotenv from "dotenv";
 import User from "../models/schema/User.schema.js";
 import RefreshToken from "~/models/schema/RefreshToken.schema.js";
+import Follower from "~/models/schema/Follower.schema.js";
 dotenv.config();
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@x-social.7fxqhfj.mongodb.net/?retryWrites=true&w=majority&appName=X-SOCIAL`;
@@ -30,6 +31,9 @@ class Database {
 
   get refreshTokens(): Collection<RefreshToken> {
     return this.db.collection("refreshTokens");
+  }
+  get followers(): Collection<Follower> {
+    return this.db.collection("followers");
   }
 }
 
