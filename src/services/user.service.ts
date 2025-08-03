@@ -1,6 +1,9 @@
+import { StatusCodes } from "http-status-codes";
 import { ObjectId } from "mongodb";
 import database from "~/config/db.js";
 import { UpdateMeReqBody } from "~/interfaces/user.interface.js";
+import Follower from "~/models/schema/Follower.schema.js";
+import ApiError from "~/utils/ApiError.js";
 
 export const getProfile = async (user_id: string) => {
   const user = await database.users.findOne(
@@ -39,4 +42,34 @@ export const updatedProfile = async (user_id: string, userData: UpdateMeReqBody)
     }
   );
   return userDoc;
+};
+
+export const follow = async (follower_id: string, following_id: string) => {
+  if (follower_id === following_id) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "You cannot follow yourself");
+  }
+  const [user1, user2] = await Promise.all([
+    database.users.findOne({ _id: new ObjectId(follower_id) }),
+    database.users.findOne({ _id: new ObjectId(following_id) })
+  ]);
+
+  if (!user1 || !user2) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  const follower = await database.followers.findOne({
+    follower_id: new ObjectId(follower_id),
+    following_id: new ObjectId(following_id)
+  });
+
+  if (follower) {
+    throw new ApiError(StatusCodes.CONFLICT, "Already followed");
+  }
+
+  await database.followers.insertOne(
+    new Follower({
+      follower_id: new ObjectId(follower_id),
+      following_id: new ObjectId(following_id)
+    })
+  );
 };

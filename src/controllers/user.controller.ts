@@ -1,4 +1,3 @@
-import { ObjectId } from "mongodb";
 import * as userService from "~/services/user.service.js";
 import { Request, Response } from "express";
 import { catchAsync } from "~/utils/catchAsync.js";
@@ -20,5 +19,14 @@ export const updateProfile = catchAsync(async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({
     message: "Updated profile successfully",
     data: updatedUser
+  });
+});
+
+export const follow = catchAsync(async (req: Request, res: Response) => {
+  const { user_id } = req.user as JwtPayload;
+  const following_id = req.params.id;
+  await userService.follow(user_id, following_id);
+  res.status(StatusCodes.OK).json({
+    message: "Follow success"
   });
 });
