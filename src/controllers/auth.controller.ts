@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as authService from "~/services/auth.service.js";
-import { RegisterReqBody } from "~/types/auth.type.js";
+import { RegisterReqBody } from "~/interfaces/auth.interface.js";
 import { catchAsync } from "~/utils/catchAsync.js";
 import { StatusCodes } from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
