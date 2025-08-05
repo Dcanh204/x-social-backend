@@ -70,3 +70,14 @@ export const resetPassword = catchAsync(async (req: Request, res: Response) => {
     message: "Reset password sucessfully"
   });
 });
+
+export const oAuthGoogle = catchAsync(async (req: Request, res: Response) => {
+  const { code } = req.query;
+  const { accessToken, refreshToken, user } = await authService.oAuthGoogle(code as string);
+  res.status(StatusCodes.OK).json({
+    message: "Login with google successfully",
+    accessToken,
+    refreshToken,
+    user
+  });
+});

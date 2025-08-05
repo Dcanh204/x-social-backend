@@ -1,7 +1,7 @@
 import database from "~/config/db.js";
 import User from "~/models/schema/User.schema.js";
 import RefreshToken from "~/models/schema/RefreshToken.schema.js";
-import { RegisterReqBody } from "~/types/auth.type.js";
+import { RegisterReqBody } from "~/interfaces/auth.interface.js";
 import { hashPassword, comparePassword } from "~/utils/hash.js";
 import {
   signAccessToken,
@@ -14,6 +14,7 @@ import { StatusCodes } from "http-status-codes";
 import ApiError from "~/utils/ApiError.js";
 import { ObjectId } from "mongodb";
 import { UserVerifyStatus } from "~/constants/enums.js";
+import axios from "axios";
 
 export const register = async (userData: RegisterReqBody) => {
   const { username, email, password } = userData;
@@ -193,4 +194,88 @@ export const resetPassword = async (forgot_password_token: string, new_password:
       }
     }
   );
+};
+
+export const getOauthGoogleToken = async (code: string) => {
+  const body = {
+    code,
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+    grant_type: "authorization_code"
+  };
+  const { data } = await axios.post("https://oauth2.googleapis.com/token", body, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
+  });
+  return data;
+};
+
+export const getGoogleUserInfo = async (id_token: string, access_token: string) => {
+  const { data } = await axios.get("https://www.googleapis.com/oauth2/v1/userinfo", {
+    params: {
+      access_token,
+      alt: "json"
+    },
+    headers: {
+      Authorization: `Bearer ${id_token}`
+    }
+  });
+  return data as {
+    id: string;
+    name: string;
+    email: string;
+    verified_email: string;
+    picture: string;
+    given_name: string;
+    family_name: string;
+  };
+};
+
+export const oAuthGoogle = async (code: string) => {
+  const { id_token, access_token } = await getOauthGoogleToken(code);
+  const googleUser = await getGoogleUserInfo(id_token, access_token);
+  if (!googleUser.verified_email) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, "Google email not verified");
+  }
+
+  let user = await database.users.findOne({ email: googleUser.email });
+  if (!user) {
+    await database.users.insertOne(
+      new User({
+        username: googleUser.name,
+        email: googleUser.email,
+        avatar: googleUser.picture,
+        date_of_birth: new Date(),
+        password: ""
+      })
+    );
+    user = await database.users.findOne({ email: googleUser.email });
+  }
+  if (!user) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Cannot create user from Google login");
+  }
+  const accessToken = await signAccessToken(user._id);
+  const refreshToken = await signRefreshToken(user._id);
+
+  await database.refreshTokens.updateOne(
+    { user_id: user._id },
+    {
+      $set: {
+        token: refreshToken
+      }
+    },
+    { upsert: true }
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+    user: {
+      id: user._id,
+      email: user.email,
+      avatar: user.avatar
+    }
+  };
 };
