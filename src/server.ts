@@ -3,10 +3,14 @@ import database from "~/config/db.js";
 import rootRouter from "~/routes/index.js";
 import dotenv from "dotenv";
 import { errorHandler } from "./middlewares/error.js";
+import { initFolderUploads } from "~/utils/fileUpload.js";
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8888;
+// create folder uploads
+initFolderUploads();
+
 //convert body to JSON
 app.use(express.json());
 
