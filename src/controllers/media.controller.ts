@@ -1,10 +1,12 @@
-import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { catchAsync } from "~/utils/catchAsync.js";
-import { handlerUploadImage } from "~/utils/fileUpload.js";
+import * as mediaService from "~/services/media.service.js";
+import { StatusCodes } from "http-status-codes";
 
 export const uploadImage = catchAsync(async (req: Request, res: Response) => {
-  const data = await handlerUploadImage(req);
-  res.json({
-    result: data
+  const url = await mediaService.uploadImage(req);
+  res.status(StatusCodes.OK).json({
+    message: "upload image successfully",
+    result: url
   });
 });

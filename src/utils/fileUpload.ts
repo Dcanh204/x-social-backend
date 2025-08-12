@@ -1,22 +1,21 @@
 import { Request } from "express";
-import formidable from "formidable";
+import formidable, { File } from "formidable";
 import fs from "fs";
 import path from "path";
 import ApiError from "./ApiError.js";
 import { StatusCodes } from "http-status-codes";
+import { UPLOAD_TEMP_DIR } from "~/constants/dirUploads.js";
 
 export const initFolderUploads = () => {
-  const uploadDir = path.resolve("uploads");
-
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  if (!fs.existsSync(UPLOAD_TEMP_DIR)) {
+    fs.mkdirSync(UPLOAD_TEMP_DIR, { recursive: true });
   }
 };
 
 export const handlerUploadImage = (req: Request) => {
   const form = formidable({
-    uploadDir: path.resolve("uploads"),
-    maxFiles: 2,
+    uploadDir: path.resolve(UPLOAD_TEMP_DIR),
+    maxFiles: 1,
     maxFileSize: 300 * 1024,
     keepExtensions: true,
     filter: function ({ name, originalFilename, mimetype }) {
@@ -27,7 +26,7 @@ export const handlerUploadImage = (req: Request) => {
       return valid;
     }
   });
-  return new Promise((resolve, reject) => {
+  return new Promise<File>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
       if (err) {
         return reject(err);
@@ -38,7 +37,7 @@ export const handlerUploadImage = (req: Request) => {
       if (!hasFile) {
         return reject(new ApiError(StatusCodes.BAD_REQUEST, "No file uploaded"));
       }
-      resolve(files);
+      resolve((files.image as formidable.File[])[0]);
     });
   });
 };
