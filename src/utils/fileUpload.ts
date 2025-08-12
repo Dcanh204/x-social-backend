@@ -15,8 +15,9 @@ export const initFolderUploads = () => {
 export const handlerUploadImage = (req: Request) => {
   const form = formidable({
     uploadDir: path.resolve(UPLOAD_TEMP_DIR),
-    maxFiles: 1,
+    maxFiles: 4,
     maxFileSize: 300 * 1024,
+    maxTotalFileSize: 300 * 1024 * 4,
     keepExtensions: true,
     filter: function ({ name, originalFilename, mimetype }) {
       const valid = Boolean(mimetype) && Boolean(mimetype?.includes("image"));
@@ -26,7 +27,7 @@ export const handlerUploadImage = (req: Request) => {
       return valid;
     }
   });
-  return new Promise<File>((resolve, reject) => {
+  return new Promise<File[]>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
       if (err) {
         return reject(err);
@@ -37,7 +38,7 @@ export const handlerUploadImage = (req: Request) => {
       if (!hasFile) {
         return reject(new ApiError(StatusCodes.BAD_REQUEST, "No file uploaded"));
       }
-      resolve((files.image as formidable.File[])[0]);
+      resolve(files.image as formidable.File[]);
     });
   });
 };
