@@ -10,3 +10,11 @@ export const uploadImage = catchAsync(async (req: Request, res: Response) => {
     result: url
   });
 });
+
+export const uploadVideo = catchAsync(async (req: Request, res: Response) => {
+  const url = await mediaService.uploadVideo(req);
+  res.status(StatusCodes.OK).json({
+    message: "upload video successfully",
+    result: url
+  });
+});
