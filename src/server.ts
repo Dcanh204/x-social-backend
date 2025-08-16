@@ -12,11 +12,18 @@ const app = express();
 const PORT = process.env.PORT || 8888;
 // create folder uploads
 initFolderUploads();
+//set video header content-type application/mp4 -> video/mp4
+app.get("/static/videos/:filename", (req, res) => {
+  const filePath = path.join(__dirname, "../uploads/videos", req.params.filename);
+  res.setHeader("Content-Type", "video/mp4"); // ép Content-Type
+  res.setHeader("Content-Disposition", "inline"); // cho phép hiển thị
+  res.sendFile(filePath);
+});
 
 // static file
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use("/images", express.static(path.join(__dirname, "../uploads")));
+app.use("/static", express.static(path.join(__dirname, "../uploads")));
 
 //convert body to JSON
 app.use(express.json());
