@@ -52,12 +52,11 @@ export const handlerUploadVideo = (req: Request) => {
     maxFileSize: 50 * 1024 * 1024, // 50MB
     keepExtensions: true,
     filter: function ({ name, originalFilename, mimetype }) {
-      return true;
-      // const valid = Boolean(mimetype) && Boolean(mimetype?.includes("image"));
-      // if (!valid) {
-      //   form.emit("error" as any, new ApiError(StatusCodes.BAD_REQUEST, "File type is not valid") as any);
-      // }
-      // return valid;
+      const valid = Boolean(mimetype) && Boolean(mimetype?.includes("mp4"));
+      if (!valid) {
+        form.emit("error" as any, new ApiError(StatusCodes.BAD_REQUEST, "File type is not valid") as any);
+      }
+      return valid;
     }
   });
   return new Promise<File[]>((resolve, reject) => {
