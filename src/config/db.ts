@@ -5,6 +5,7 @@ import RefreshToken from "~/models/schema/RefreshToken.schema.js";
 import Follower from "~/models/schema/Follower.schema.js";
 import Tweet from "~/models/schema/Tweet.schema.js";
 import Hashtag from "~/models/schema/Hashtag.schema.js";
+import Bookmark from "~/models/schema/Bookmark.schema.js";
 dotenv.config();
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@x-social.7fxqhfj.mongodb.net/?retryWrites=true&w=majority&appName=X-SOCIAL`;
@@ -44,6 +45,10 @@ class Database {
 
   get hashtags(): Collection<Hashtag> {
     return this.db.collection("hashtags");
+  }
+
+  get bookmarks(): Collection<Bookmark> {
+    return this.db.collection("bookmarks");
   }
 }
 
