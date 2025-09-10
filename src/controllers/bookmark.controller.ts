@@ -12,3 +12,12 @@ export const createBookmark = catchAsync(async (req: Request, res: Response) => 
     result
   });
 });
+
+export const deleteBookmark = catchAsync(async (req: Request, res: Response) => {
+  const { user_id } = req.user as JwtPayload;
+  const result = await bookmarkService.deleteBookmark(user_id, req.params.tweet_id);
+  res.status(StatusCodes.OK).json({
+    message: "Delete bookmark successfully",
+    result
+  });
+});

@@ -1,6 +1,8 @@
+import { StatusCodes } from "http-status-codes";
 import { ObjectId, ReturnDocument } from "mongodb";
 import database from "~/config/db.js";
 import Bookmark from "~/models/schema/Bookmark.schema.js";
+import ApiError from "~/utils/ApiError.js";
 
 export const createBookmark = async (user_id: string, tweet_id: string) => {
   const result = await database.bookmarks.findOneAndUpdate(
@@ -19,6 +21,19 @@ export const createBookmark = async (user_id: string, tweet_id: string) => {
       returnDocument: "after"
     }
   );
+  return {
+    result
+  };
+};
+
+export const deleteBookmark = async (user_id: string, tweet_id: string) => {
+  const result = await database.bookmarks.findOneAndDelete({
+    user_id: new ObjectId(user_id),
+    tweet_id: new ObjectId(tweet_id)
+  });
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Bookmark not found");
+  }
   return {
     result
   };
