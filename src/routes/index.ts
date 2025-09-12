@@ -4,6 +4,7 @@ import userRouter from "./user.routes.js";
 import mediaRouter from "./medias.routes.js";
 import tweetRouter from "./tweet.routes.js";
 import bookmarkRooter from "./bookmark.routes.js";
+import likeRooter from "./like.route.js";
 const rootRouter = express.Router();
 // router auth
 rootRouter.use("/auth", authRouter);
@@ -15,5 +16,6 @@ rootRouter.use("/medias", mediaRouter);
 rootRouter.use("/tweets", tweetRouter);
 // router bookmark
 rootRouter.use("/bookmarks", bookmarkRooter);
-
+// router like
+rootRouter.use("/likes", likeRooter);
 export default rootRouter;

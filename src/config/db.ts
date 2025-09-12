@@ -6,6 +6,7 @@ import Follower from "~/models/schema/Follower.schema.js";
 import Tweet from "~/models/schema/Tweet.schema.js";
 import Hashtag from "~/models/schema/Hashtag.schema.js";
 import Bookmark from "~/models/schema/Bookmark.schema.js";
+import Like from "~/models/schema/Like.schema.js";
 dotenv.config();
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@x-social.7fxqhfj.mongodb.net/?retryWrites=true&w=majority&appName=X-SOCIAL`;
@@ -49,6 +50,10 @@ class Database {
 
   get bookmarks(): Collection<Bookmark> {
     return this.db.collection("bookmarks");
+  }
+
+  get likes(): Collection<Like> {
+    return this.db.collection("likes");
   }
 }
 
