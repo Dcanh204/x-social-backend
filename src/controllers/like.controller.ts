@@ -11,3 +11,12 @@ export const like = catchAsync(async (req: Request, res: Response) => {
     result
   });
 });
+
+export const unlike = catchAsync(async (req: Request, res: Response) => {
+  const { user_id } = req.user as JwtPayload;
+  const result = await likeService.unlike(user_id, req.params.tweet_id);
+  res.status(StatusCodes.OK).json({
+    message: "unlike successfully",
+    result
+  });
+});
