@@ -11,3 +11,11 @@ export const createTweet = catchAsync(async (req: Request, res: Response) => {
     result
   });
 });
+
+export const getTweetById = catchAsync(async (req: Request, res: Response) => {
+  const result = await tweetService.getTweetById(req.params.tweet_id);
+  res.json({
+    message: " Get Tweet Detail Successfully",
+    result
+  });
+});

@@ -1,8 +1,10 @@
+import { StatusCodes } from "http-status-codes";
 import { ObjectId, WithId } from "mongodb";
 import database from "~/config/db.js";
 import { TweetRequestBody } from "~/interfaces/tweet.interface.js";
 import Hashtag from "~/models/schema/Hashtag.schema.js";
 import Tweet from "~/models/schema/Tweet.schema.js";
+import ApiError from "~/utils/ApiError.js";
 
 export const checkandCreateHashtags = async (hashtags: string[]) => {
   const hashtagDoc = await Promise.all(
@@ -39,4 +41,16 @@ export const createTweet = async (user_id: string, body: TweetRequestBody) => {
   );
   const tweet = await database.tweets.findOne({ _id: result.insertedId });
   return tweet;
+};
+
+export const getTweetById = async (tweet_id: string) => {
+  const tweetDoc = await database.tweets.findOne({
+    _id: new ObjectId(tweet_id)
+  });
+
+  if (!tweetDoc) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Tweet not found!");
+  }
+
+  return tweetDoc;
 };
