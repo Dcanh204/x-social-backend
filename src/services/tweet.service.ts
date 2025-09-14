@@ -54,3 +54,16 @@ export const getTweetById = async (tweet_id: string) => {
 
   return tweetDoc;
 };
+
+export const deleteTweetById = async (user_id: string, tweet_id: string) => {
+  const tweetDoc = await database.tweets.findOneAndDelete({
+    _id: new ObjectId(tweet_id),
+    user_id: new ObjectId(user_id)
+  });
+
+  if (!tweetDoc) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Tweet not found!");
+  }
+
+  return tweetDoc;
+};

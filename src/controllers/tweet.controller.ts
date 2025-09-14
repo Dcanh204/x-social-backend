@@ -19,3 +19,12 @@ export const getTweetById = catchAsync(async (req: Request, res: Response) => {
     result
   });
 });
+
+export const deleteTweetById = catchAsync(async (req: Request, res: Response) => {
+  const { user_id } = req.user as JwtPayload;
+  const result = await tweetService.deleteTweetById(user_id, req.params.tweet_id);
+  res.json({
+    message: " Delete Tweet Successfully",
+    result
+  });
+});
