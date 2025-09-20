@@ -48,12 +48,118 @@ export const getTweetById = async (tweet_id: string) => {
   const tweetDoc = await database.tweets.findOne({
     _id: new ObjectId(tweet_id)
   });
-
   if (!tweetDoc) {
     throw new ApiError(StatusCodes.NOT_FOUND, "Tweet not found!");
   }
+  const results = await database.tweets
+    .aggregate<Tweet>([
+      {
+        $match: {
+          _id: new ObjectId(tweet_id)
+        }
+      },
+      {
+        $lookup: {
+          from: "hashtags",
+          localField: "hashtags",
+          foreignField: "_id",
+          as: "hashtags"
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "mentions",
+          foreignField: "_id",
+          as: "mentions"
+        }
+      },
+      {
+        $addFields: {
+          mentions: {
+            $map: {
+              input: "$mentions",
+              as: "mention",
+              in: {
+                _id: "$$mention._id",
+                name: "$$mention.name",
+                email: "$$mention.email"
+              }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "bookmarks",
+          localField: "_id",
+          foreignField: "tweet_id",
+          as: "bookmarks"
+        }
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "tweet_id",
+          as: "likes"
+        }
+      },
+      {
+        $lookup: {
+          from: "tweets",
+          localField: "_id",
+          foreignField: "parent_id",
+          as: "tweet_children"
+        }
+      },
+      {
+        $addFields: {
+          bookmark_count: {
+            $size: "$bookmarks"
+          },
+          like_count: {
+            $size: "$likes"
+          },
+          retweet_count: {
+            $size: {
+              $filter: {
+                input: "$tweet_children",
+                as: "item",
+                cond: {
+                  $eq: ["$$item.type", TweetType.Retweet]
+                }
+              }
+            }
+          },
+          comment_count: {
+            $size: {
+              $filter: {
+                input: "$tweet_children",
+                as: "item",
+                cond: {
+                  $eq: ["$$item.type", TweetType.Comment]
+                }
+              }
+            }
+          },
+          quote_count: {
+            $size: {
+              $filter: {
+                input: "$tweet_children",
+                as: "item",
+                cond: {
+                  $eq: ["$$item.type", TweetType.QuoteTweet]
+                }
+              }
+            }
+          }
+        }
+      }
+    ])
+    .toArray();
 
-  return tweetDoc;
+  return results;
 };
 
 export const deleteTweetById = async (user_id: string, tweet_id: string) => {
