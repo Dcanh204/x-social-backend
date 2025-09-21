@@ -23,9 +23,16 @@ class Database {
     try {
       // Send a ping to confirm a successful connection
       await this.db.command({ ping: 1 });
+      await this.indexTweet();
       console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } catch (error) {
       console.log(error);
+    }
+  }
+  async indexTweet() {
+    const exists = await this.tweets.indexExists(["content_text"]);
+    if (!exists) {
+      await this.tweets.createIndex({ content: "text" });
     }
   }
 
